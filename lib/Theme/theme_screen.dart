@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 final ThemeData themeData = ThemeData(
-  primaryColor: const Color.fromARGB(255, 243, 4, 123), // Verde mexicano
-  scaffoldBackgroundColor: Colors.white,
+  primaryColor: const Color.fromARGB(255, 255, 21, 111),
   fontFamily: 'Roboto',
   textTheme: const TextTheme(
     displayLarge: TextStyle(
@@ -13,5 +12,5 @@ final ThemeData themeData = ThemeData(
     bodyMedium: TextStyle(fontSize: 14.0, color: Colors.black54),
   ),
   colorScheme: ColorScheme.fromSwatch()
-      .copyWith(secondary: const Color.fromARGB(255, 2, 248, 35)),
-);
+      .copyWith(secondary: const Color.fromARGB(255,190, 242, 0),
+));
