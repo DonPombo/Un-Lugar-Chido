@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:un_lugar_chido_app/presentation/contacto_screen.dart';
 import 'package:un_lugar_chido_app/presentation/screens.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,8 +13,9 @@ class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _children = [
     const WelcomeScreen(),
-    CatalogoMenuScreen(),
+    const CatalogoMenuScreen(),
     const QRScreen(),
+    const ContactoScreen()
   ];
 
   @override
@@ -21,10 +23,10 @@ class HomePageState extends State<HomePage> {
     return Scaffold(
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         onTap: onTabTapped,
         currentIndex: _currentIndex,
         selectedItemColor: themeData.primaryColor,
-        
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -37,6 +39,10 @@ class HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code),
             label: 'QR',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.contact_phone),
+            label: 'Contacto',
           ),
         ],
       ),

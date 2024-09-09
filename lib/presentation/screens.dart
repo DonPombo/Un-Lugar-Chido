@@ -1,3 +1,5 @@
+export 'package:un_lugar_chido_app/presentation/contacto_screen.dart';
+
 export 'package:un_lugar_chido_app/presentation/home.dart';
 
 export 'package:un_lugar_chido_app/router/app_router.dart';
