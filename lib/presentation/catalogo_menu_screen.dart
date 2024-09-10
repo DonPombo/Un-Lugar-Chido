@@ -24,7 +24,7 @@ class _CatalogoMenuScreenState extends State<CatalogoMenuScreen> {
     },
     {
       'name': 'Margarita',
-      'price': '\$70',
+      'price': '\$80',
       'category': 'Bebidas',
       'image': 'assets/images/margarita.jpg'
     },
