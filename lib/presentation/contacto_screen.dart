@@ -28,9 +28,9 @@ class ContactoScreen extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.center,
               image: const AssetImage('assets/images/logoChido.png'),
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(
                 Colors.white.withOpacity(0.8),
                 BlendMode.lighten,

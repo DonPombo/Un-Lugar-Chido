@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:un_lugar_chido_app/presentation/contacto_screen.dart';
 import 'package:un_lugar_chido_app/presentation/screens.dart';
 
 class HomePage extends StatefulWidget {

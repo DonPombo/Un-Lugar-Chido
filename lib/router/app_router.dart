@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:un_lugar_chido_app/presentation/contacto_screen.dart';
 import 'package:un_lugar_chido_app/presentation/screens.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,7 +16,7 @@ final appRouter = GoRouter(
       path: '/catalogo',
       pageBuilder: (context, state) => MaterialPage(
         key: state.pageKey,
-        child: CatalogoMenuScreen(),
+        child: const CatalogoMenuScreen(),
       ),
     ),
     GoRoute(
