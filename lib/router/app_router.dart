@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:un_lugar_chido_app/presentation/screens.dart';
 import 'package:go_router/go_router.dart';
+import 'package:un_lugar_chido_app/screens/login_screen.dart';
+import 'package:un_lugar_chido_app/screens/panel_admin_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -31,6 +33,20 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) => MaterialPage(
         key: state.pageKey,
         child: const ContactoScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/admin',
+      pageBuilder: (context, state) => MaterialPage(
+        key: state.pageKey,
+        child: const PanelAdminScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (context, state) => MaterialPage(
+        key: state.pageKey,
+        child:  LoginScreen(),
       ),
     ),
   ],

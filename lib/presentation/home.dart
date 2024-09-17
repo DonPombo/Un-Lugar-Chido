@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:un_lugar_chido_app/presentation/screens.dart';
 
 class HomePage extends StatefulWidget {
@@ -52,5 +53,9 @@ class HomePageState extends State<HomePage> {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void navigateToLogin() {
+    context.go('/login');
   }
 }
