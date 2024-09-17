@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "725581954382",
+    "project_id": "un-lugar-chido",
+    "storage_bucket": "un-lugar-chido.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725581954382:android:dcb66b5bde80490062f21f",
+        "android_client_info": {
+          "package_name": "com.unlugarchido.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpphlODU7twg7s3Ay1PS4ptbyeAD0cxs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
