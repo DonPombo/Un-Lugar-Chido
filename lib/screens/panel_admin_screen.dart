@@ -136,6 +136,7 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
                   await _firestoreService.actualizarProducto(nuevoProducto);
                 }
 
+                // ignore: use_build_context_synchronously
                 Future.microtask(() => context.pop());
                 
               },

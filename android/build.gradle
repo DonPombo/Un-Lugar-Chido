@@ -16,3 +16,13 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+buildscript {
+    repositories {
+        google()  // Asegúrate de que 'google()' esté aquí
+        mavenCentral()  // Asegúrate de tener este repositorio
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.2'  // Versión actual del plugin de Gradle
+        classpath 'com.google.gms:google-services:4.3.10'  // Firebase services
+    }
+}

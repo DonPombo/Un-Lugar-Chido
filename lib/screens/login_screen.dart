@@ -4,11 +4,13 @@ import '../presentation/screens.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
@@ -60,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         size: 100,
                         color: themeData.primaryColor,
                       ),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 40),
                       TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Email',
@@ -72,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         validator: (val) => val!.isEmpty ? 'Ingresa un email' : null,
                         onChanged: (val) => setState(() => _email = val),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
@@ -85,13 +87,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         validator: (val) => val!.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : null,
                         onChanged: (val) => setState(() => _password = val),
                       ),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 40),
                       ElevatedButton(
-                        child: Text('Iniciar Sesión'),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white, backgroundColor: themeData.colorScheme.secondary,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          textStyle: TextStyle(fontSize: 18),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          textStyle: const TextStyle(fontSize: 18),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -100,17 +101,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           if (_formKey.currentState!.validate()) {
                             bool result = await _auth.iniciarSesion(_email, _password);
                             if (result) {
+                              // ignore: use_build_context_synchronously
                               context.go('/admin');
                             } else {
                               setState(() => _error = 'No se pudo iniciar sesión. Verifica tus credenciales.');
                             }
                           }
                         },
+                        child: const Text('Iniciar Sesión'),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       Text(
                         _error,
-                        style: TextStyle(color: Colors.red, fontSize: 14.0),
+                        style: const TextStyle(color: Colors.red, fontSize: 14.0),
                         textAlign: TextAlign.center,
                       ),
                     ],

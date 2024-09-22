@@ -46,7 +46,7 @@ final appRouter = GoRouter(
       path: '/login',
       pageBuilder: (context, state) => MaterialPage(
         key: state.pageKey,
-        child:  LoginScreen(),
+        child:  const LoginScreen(),
       ),
     ),
   ],
