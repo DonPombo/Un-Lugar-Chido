@@ -30,4 +30,27 @@ class AuthService {
   Future<void> cerrarSesion() async {
     await _auth.signOut();
   }
+
+  // Método para crear un nuevo usuario (solo para uso administrativo)
+  Future<bool> crearUsuario(String email, String password, String nombre, String rol) async {
+    try {
+      UserCredential resultado = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password
+      );
+      User? usuario = resultado.user;
+      if (usuario != null) {
+        await _firestore.collection('usuarios').doc(usuario.uid).set({
+          'nombre': nombre,
+          'email': email,
+          'rol': rol,
+        });
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
 }

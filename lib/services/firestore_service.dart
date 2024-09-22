@@ -20,4 +20,12 @@ class FirestoreService {
   Future<void> actualizarDisponibilidad(String productoId, bool disponible) async {
     await _firestore.collection('productos').doc(productoId).update({'disponible': disponible});
   }
+
+  Future<void> eliminarProducto(String productoId) async {
+    await _firestore.collection('productos').doc(productoId).delete();
+  }
+
+  Stream<QuerySnapshot> getProductosStream() {
+    return _firestore.collection('productos').snapshots();
+  }
 }

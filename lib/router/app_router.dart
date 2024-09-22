@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:un_lugar_chido_app/pages/screens.dart';
 import 'package:go_router/go_router.dart';
-import 'package:un_lugar_chido_app/screens/login_screen.dart';
-import 'package:un_lugar_chido_app/screens/panel_admin_screen.dart';
+import 'package:un_lugar_chido_app/admin%20screens/login_screen.dart';
+import 'package:un_lugar_chido_app/admin%20screens/panel_admin_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
