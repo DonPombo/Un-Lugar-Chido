@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:un_lugar_chido_app/presentation/screens.dart';
+import 'package:un_lugar_chido_app/pages/screens.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../presentation/screens.dart';
+import '../pages/screens.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
