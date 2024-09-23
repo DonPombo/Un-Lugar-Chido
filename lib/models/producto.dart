@@ -1,10 +1,9 @@
-
-
 class Producto {
   String? id;
   String nombre;
   double precio;
   String categoria;
+  String subclase;
   String imagen;
   String descripcion;
   bool disponible;
@@ -14,6 +13,7 @@ class Producto {
     required this.nombre,
     required this.precio,
     required this.categoria,
+    required this.subclase,
     required this.imagen,
     required this.descripcion,
     required this.disponible,
@@ -25,6 +25,7 @@ class Producto {
       nombre: data['nombre'] ?? '',
       precio: (data['precio'] ?? 0).toDouble(),
       categoria: data['categoria'] ?? '',
+      subclase: data['subclase'] ?? 'opcion1',
       imagen: data['imagen'] ?? '',
       descripcion: data['descripcion'] ?? '',
       disponible: data['disponible'] ?? false,
@@ -36,6 +37,7 @@ class Producto {
       'nombre': nombre,
       'precio': precio,
       'categoria': categoria,
+      'subcategoria': subclase,
       'imagen': imagen,
       'descripcion': descripcion,
       'disponible': disponible,
