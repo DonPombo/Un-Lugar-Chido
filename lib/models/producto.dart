@@ -4,9 +4,10 @@ class Producto {
   double precio;
   String categoria;
   String subclase;
-  String imagen;
+  String? imagen; // Ahora es opcional
   String descripcion;
   bool disponible;
+  String? agregados; // Campo opcional para agregados
 
   Producto({
     this.id,
@@ -14,9 +15,10 @@ class Producto {
     required this.precio,
     required this.categoria,
     required this.subclase,
-    required this.imagen,
+    this.imagen, // No requerido
     required this.descripcion,
     required this.disponible,
+    this.agregados,
   });
 
   factory Producto.fromMap(Map<String, dynamic> data, String id) {
@@ -26,9 +28,10 @@ class Producto {
       precio: (data['precio'] ?? 0).toDouble(),
       categoria: data['categoria'] ?? '',
       subclase: data['subclase'] ?? 'opcion1',
-      imagen: data['imagen'] ?? '',
+      imagen: data['imagen'], // Puede ser nulo
       descripcion: data['descripcion'] ?? '',
       disponible: data['disponible'] ?? false,
+      agregados: data['agregados'], // Puede ser nulo
     );
   }
 
@@ -38,9 +41,10 @@ class Producto {
       'precio': precio,
       'categoria': categoria,
       'subcategoria': subclase,
-      'imagen': imagen,
+      'imagen': imagen, // Puede ser null
       'descripcion': descripcion,
       'disponible': disponible,
+      'agregados': agregados, // Puede ser null
     };
   }
 }
