@@ -1,55 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'detalle_item_screen.dart';
+import '/models/producto.dart'; // Asegúrate de que la ruta sea correcta
 
-class CatalogoMenuScreen extends StatefulWidget {
+class CatalogoMenuScreen extends StatelessWidget {
+  // Cambia a Stateless si no hay estado que manejar
   const CatalogoMenuScreen({super.key});
-
-  @override
-  State<CatalogoMenuScreen> createState() => _CatalogoMenuScreenState();
-}
-
-class _CatalogoMenuScreenState extends State<CatalogoMenuScreen> {
-  final List<Map<String, dynamic>> items = [
-    {
-      'name': 'Tacos al Pastor',
-      'price': '\$50',
-      'category': 'Menú',
-      'image': 'assets/images/tacos.jpg',
-      'description': 'Deliciosos tacos de carne de cerdo marinada con piña.',
-      'available': true,
-    },
-    {
-      'name': 'Guacamole',
-      'price': '\$30',
-      'category': 'Menú',
-      'image': 'assets/images/guacamole.jpg',
-      'description': 'Cremoso guacamole hecho con aguacates frescos.',
-      'available': true,
-    },
-    {
-      'name': 'Margarita',
-      'price': '\$80',
-      'category': 'Barra',
-      'image': 'assets/images/margarita.jpg',
-      'description': 'Clásico coctel mexicano con tequila y limón.',
-      'available': false,
-    },
-  ];
-
-  List<Map<String, dynamic>> _sortItems(List<Map<String, dynamic>> items) {
-    items.sort((a, b) {
-      if (a['available'] == b['available']) {
-        return 0;
-      }
-      return a['available'] ? -1 : 1;
-    });
-    return items;
-  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 3, // Número de pestañas
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Nuestro Menú'),
@@ -65,29 +26,72 @@ class _CatalogoMenuScreenState extends State<CatalogoMenuScreen> {
         ),
         body: TabBarView(
           children: [
-            _buildItemList(_sortItems(items)),
-            _buildItemList(_sortItems(
-                items.where((item) => item['category'] == 'Menú').toList())),
-            _buildItemList(_sortItems(
-                items.where((item) => item['category'] == 'Barra').toList())),
+            _buildItemList(),
+            _buildItemListByCategory('menu'),
+            _buildItemListByCategory('barra'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildItemList(List<Map<String, dynamic>> items) {
+  Widget _buildItemList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('productos').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        List<Producto> productos = snapshot.data!.docs
+            .map((doc) =>
+                Producto.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
+
+        return _buildListView(productos);
+      },
+    );
+  }
+
+  Widget _buildItemListByCategory(String category) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('productos')
+          .where('categoria', isEqualTo: category)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        List<Producto> productos = snapshot.data!.docs
+            .map((doc) =>
+                Producto.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
+
+        return _buildListView(productos);
+      },
+    );
+  }
+
+  Widget _buildListView(List<Producto> productos) {
     return ListView.builder(
-      itemCount: items.length,
+      itemCount: productos.length,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final item = productos[index];
         return Card(
           child: ListTile(
             leading: Stack(
               children: [
-                Image.asset(item['image'],
+                Image.network(item.imagen ?? 'assets/images/default_image.png',
                     width: 80, height: 80, fit: BoxFit.cover),
-                if (!item['available'])
+                if (!item.disponible)
                   Container(
                     width: 80,
                     height: 80,
@@ -102,15 +106,16 @@ class _CatalogoMenuScreenState extends State<CatalogoMenuScreen> {
                   ),
               ],
             ),
-            title: Text(item['name']),
-            subtitle: Text(item['price']),
+            title: Text(item.nombre),
+            subtitle: Text('\$${item.precio.toStringAsFixed(2)}'),
             trailing: Icon(Icons.arrow_forward_ios,
                 color: Theme.of(context).primaryColor),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetalleItemScreen(item: item),
+                  builder: (context) => DetalleItemScreen(
+                      item: item), // Cambia esto a item.toMap()
                 ),
               );
             },
