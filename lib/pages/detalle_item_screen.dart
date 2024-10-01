@@ -20,7 +20,7 @@ class DetalleItemScreen extends StatelessWidget {
               alignment: Alignment.bottomLeft,
               children: [
                 Image.network(
-                  item.imagen ?? 'assets/images/default_image.png', // Cambia a Image.network
+                  item.imagen, // Cambia a Image.network
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
@@ -67,6 +67,10 @@ class DetalleItemScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Categoría: ${item.categoria}', // Cambia a item.categoria
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    'subcategoría: ${item.subcategoria}', 
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],

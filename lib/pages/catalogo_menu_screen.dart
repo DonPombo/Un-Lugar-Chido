@@ -27,8 +27,8 @@ class CatalogoMenuScreen extends StatelessWidget {
         body: TabBarView(
           children: [
             _buildItemList(),
-            _buildItemListByCategory('menu'),
-            _buildItemListByCategory('barra'),
+            _buildItemListByCategory('Menú'),
+            _buildItemListByCategory('Barra'),
           ],
         ),
       ),
@@ -89,8 +89,15 @@ class CatalogoMenuScreen extends StatelessWidget {
           child: ListTile(
             leading: Stack(
               children: [
-                Image.network(item.imagen ?? 'assets/images/default_image.png',
-                    width: 80, height: 80, fit: BoxFit.cover),
+                Image.network(
+                  item.imagen,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover, // Ajusta la imagen al contenedor
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.image_not_supported, size: 40);
+                  },
+                ),
                 if (!item.disponible)
                   Container(
                     width: 80,

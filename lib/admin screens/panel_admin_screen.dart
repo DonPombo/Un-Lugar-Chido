@@ -91,8 +91,8 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
                               30.0), // Borde redondeado para la imagen
                           child: Image.network(
                             producto.imagen,
-                            width: 60,
-                            height: 60,
+                            width: 80,
+                            height: 80,
                             fit: BoxFit.cover, // Ajusta la imagen al contenedor
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(Icons.image_not_supported,
