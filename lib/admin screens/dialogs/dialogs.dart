@@ -1,6 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import '../../models/producto.dart';
 import '/services/firestore_service.dart';
+
+import 'dart:io';
+import 'package:image_picker/image_picker.dart'; // Para seleccionar imágenes
+
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 
 Future<void> mostrarDialogoEdicion({
   required BuildContext context,
@@ -14,10 +23,54 @@ Future<void> mostrarDialogoEdicion({
       TextEditingController(text: producto?.nombre ?? '');
   final TextEditingController precioController =
       TextEditingController(text: producto?.precio.toString() ?? '');
-  final TextEditingController imagenController =
-      TextEditingController(text: producto?.imagen ?? '');
   final TextEditingController descripcionController =
       TextEditingController(text: producto?.descripcion ?? '');
+
+  // Variables para la imagen
+  File? image; // Para móviles
+  Uint8List? webImage; // Para web
+
+  // URL de imagen por defecto
+  String defaultImageUrl =
+      '/assets/images/logoChido.png'; // URL de imagen por defecto
+
+  // Imagen por defecto o imagen existente
+  String imageUrl = producto?.imagen ?? defaultImageUrl;
+
+  // Función para seleccionar imagen desde móvil o web
+  Future<void> pickImage() async {
+    setLoading(
+        false); // Se indica que la operación de selección de imagen está en progreso
+    if (kIsWeb) {
+      final input = html.FileUploadInputElement();
+      input.accept = 'image/*';
+      input.click();
+
+      input.onChange.listen((e) async {
+        final files = input.files;
+        if (files!.isEmpty) {
+          setLoading(false);
+          return;
+        }
+
+        final reader = html.FileReader();
+        reader.readAsArrayBuffer(files[0]);
+        reader.onLoadEnd.listen((e) {
+          webImage = reader.result as Uint8List;
+          setLoading(false); // Finaliza la operación
+        });
+      });
+    } else {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        image = File(pickedFile.path);
+      }
+    }
+    setLoading(false); // Finaliza la operación de carga
+  }
+
   String categoria = producto?.categoria ?? 'Menú';
   String subcategoria = producto?.subcategoria ?? 'Tacos';
   bool disponible = producto?.disponible ?? true;
@@ -44,7 +97,7 @@ Future<void> mostrarDialogoEdicion({
                   },
                 ),
                 // TODO : Agregar validación para el precio
-
+                // TODO : Agregar validación para el precio #
                 TextFormField(
                   controller: precioController,
                   keyboardType: TextInputType.number,
@@ -52,6 +105,13 @@ Future<void> mostrarDialogoEdicion({
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'El precio no puede estar vacío';
+                    }
+                    final n = double.tryParse(value);
+                    if (n == null) {
+                      return 'Ingresa un número válido';
+                    }
+                    if (n <= 0) {
+                      return 'El precio debe ser mayor que 0';
                     }
                     return null;
                   },
@@ -140,19 +200,24 @@ Future<void> mostrarDialogoEdicion({
                     disponible = value;
                   },
                 ),
-                const Text('seleccionar imagen'),
-                // TODO : implementar la selección de imagen
 
-                // TextFormField(
-                //   controller: imagenController,
-                //   decoration: const InputDecoration(labelText: 'URL de Imagen'),
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return 'La URL de la imagen no puede estar vacía';
-                //     }
-                //     return null;
-                //   },
-                // ),
+                // TODO :  implementar la URL correcta  para subir la imagen
+
+                // Botón para seleccionar imagen
+                ElevatedButton(
+                  onPressed: pickImage,
+                  child: const Text('Seleccionar Imagen'),
+                ),
+
+                // Mostrar la imagen seleccionada (móvil o web) o la imagen por defecto
+                if (image != null)
+                  Image.file(image!, height: 80, width: 80)
+                else if (webImage != null)
+                  Image.memory(webImage!, height: 80, width: 80)
+                else if (imageUrl.isNotEmpty)
+                  Image.network(imageUrl, height: 80, width: 80)
+                else
+                  Image.network(defaultImageUrl, height: 80, width: 80),
               ],
             ),
           ),
@@ -171,37 +236,62 @@ Future<void> mostrarDialogoEdicion({
             child: const Text('Guardar'),
             onPressed: () async {
               if (formKey.currentState!.validate()) {
-                setLoading(true);
-
-                Producto nuevoProducto = Producto(
-                  id: producto?.id,
-                  nombre: nombreController.text,
-                  precio: double.tryParse(precioController.text) ?? 0,
-                  categoria: categoria,
-                  subcategoria: subcategoria,
-                  imagen: imagenController.text,
-                  descripcion: descripcionController.text,
-                  disponible: disponible,
-                );
+                setLoading(true); // Muestra un indicador de carga
 
                 try {
+                  // Subir imagen si fue seleccionada
+                  if (image != null || webImage != null) {
+                    // Determina el nombre del archivo
+                    String fileName = image !=
+                            null // Para el nombre del archivo seleccionado en web
+                        ? basename(image!
+                            .path) // Obtiene el nombre del archivo en Android
+                        : 'producto_${DateTime.now().millisecondsSinceEpoch}'; // Nombre de la imagen
+
+                    // Llama a la función subirImagen y guarda la URL de descarga
+                    imageUrl = await firestoreService.subirImagen(
+                      image != null ? image! : webImage!,
+                      isWeb: kIsWeb,
+                      fileName: fileName,
+                    );
+                    producto?.imagen = imageUrl;
+                  }
+
+                  // Crea un nuevo producto con los datos ingresados
+                  Producto nuevoProducto = Producto(
+                    id: producto?.id,
+                    nombre: nombreController.text,
+                    precio: double.tryParse(precioController.text) ?? 0,
+                    categoria: categoria,
+                    subcategoria: subcategoria,
+                    imagen: imageUrl, // Guardar la URL de la imagen
+                    descripcion: descripcionController.text,
+                    disponible: disponible,
+                  );
+
+                  // Guardar el producto en Firestore
                   if (producto == null) {
                     await firestoreService.agregarProducto(nuevoProducto);
                   } else {
                     await firestoreService.actualizarProducto(nuevoProducto);
                   }
+
+                  // Muestra un mensaje de éxito
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Producto guardado exitosamente')),
                   );
                 } catch (e) {
+                  // Manejo de errores al guardar el producto
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error al guardar el producto: $e')),
                   );
+                } finally {
+                  setLoading(false); // Oculta el indicador de carga
                 }
 
-                setLoading(false);
-                Navigator.of(context).pop();
+                Navigator.of(context)
+                    .pop(); // Cierra el diálogo o pantalla actual
               }
             },
           ),

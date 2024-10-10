@@ -31,7 +31,7 @@ class DetalleItemScreen extends StatelessWidget {
                     color: Colors.black.withOpacity(0.6),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: const Text(
-                      'No disponible',
+                      'Agotado',
                       style: TextStyle(color: Colors.white, fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
@@ -70,7 +70,7 @@ class DetalleItemScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   Text(
-                    'subcategoría: ${item.subcategoria}', 
+                    'subcategoría: ${item.subcategoria}',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],

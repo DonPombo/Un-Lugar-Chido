@@ -8,6 +8,9 @@ class Producto {
   String descripcion;
   bool disponible;
 
+ 
+
+
   Producto({
     this.id,
     required this.nombre,

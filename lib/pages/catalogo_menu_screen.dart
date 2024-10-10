@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'detalle_item_screen.dart';
-import '/models/producto.dart'; // Asegúrate de que la ruta sea correcta
+import '/models/producto.dart';
 
 class CatalogoMenuScreen extends StatelessWidget {
-  // Cambia a Stateless si no hay estado que manejar
   const CatalogoMenuScreen({super.key});
 
   @override
@@ -81,31 +80,33 @@ class CatalogoMenuScreen extends StatelessWidget {
   }
 
   Widget _buildListView(List<Producto> productos) {
+    String defaultImageUrl = '/assets/images/logoChido.png';
     return ListView.builder(
       itemCount: productos.length,
       itemBuilder: (context, index) {
-        final item = productos[index];
+        final producto = productos[index];
         return Card(
           child: ListTile(
             leading: Stack(
               children: [
                 Image.network(
-                  item.imagen,
+                  producto.imagen,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover, // Ajusta la imagen al contenedor
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.image_not_supported, size: 40);
+                    return Image.network(defaultImageUrl,
+                        height: 80, width: 80);
                   },
                 ),
-                if (!item.disponible)
+                if (!producto.disponible)
                   Container(
                     width: 80,
                     height: 80,
                     color: Colors.black.withOpacity(0.6),
                     child: const Center(
                       child: Text(
-                        'No disponible',
+                        'Agotado',
                         style: TextStyle(color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
@@ -113,8 +114,8 @@ class CatalogoMenuScreen extends StatelessWidget {
                   ),
               ],
             ),
-            title: Text(item.nombre),
-            subtitle: Text('\$${item.precio.toStringAsFixed(2)}'),
+            title: Text(producto.nombre),
+            subtitle: Text('\$${producto.precio.toStringAsFixed(2)}'),
             trailing: Icon(Icons.arrow_forward_ios,
                 color: Theme.of(context).primaryColor),
             onTap: () {
@@ -122,7 +123,7 @@ class CatalogoMenuScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => DetalleItemScreen(
-                      item: item), // Cambia esto a item.toMap()
+                      item: producto), // Cambia esto a item.toMap()
                 ),
               );
             },

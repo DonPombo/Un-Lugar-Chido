@@ -19,6 +19,7 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+  String defaultImageUrl = '/assets/images/logoChido.png';
 
   @override
   Widget build(BuildContext context) {
@@ -84,23 +85,34 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
               itemCount: productos.length,
               itemBuilder: (context, index) {
                 Producto producto = productos[index];
+
                 return ListTile(
-                  leading: producto.imagen.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                              30.0), // Borde redondeado para la imagen
-                          child: Image.network(
+                  leading: ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(30.0), // Borde redondeado
+                    child: producto.imagen.isNotEmpty
+                        ? Image.network(
                             producto.imagen,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover, // Ajusta la imagen al contenedor
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.image_not_supported,
-                                  size: 60);
+                              // Imagen por defecto en caso de error
+                              return Image.network(
+                                defaultImageUrl, // URL de imagen por defecto
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              );
                             },
+                          )
+                        : Image.network(
+                            defaultImageUrl, // URL de imagen por defecto si no hay imagen disponible
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
                           ),
-                        )
-                      : const Icon(Icons.image_not_supported, size: 60),
+                  ),
                   title: Text(producto.nombre),
                   subtitle: Text('\$${producto.precio.toStringAsFixed(2)}'),
                   trailing: Row(
