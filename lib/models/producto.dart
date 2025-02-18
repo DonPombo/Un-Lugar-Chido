@@ -1,15 +1,13 @@
+
 class Producto {
-  String? id;
-  String nombre;
-  double precio;
-  String categoria;
-  String subcategoria;
-  String imagen ;
-  String descripcion;
-  bool disponible;
-
- 
-
+  final String? id;
+  final String nombre;
+  final double precio;
+  final String categoria;
+  final String subcategoria;
+  final String imagen;
+  final String descripcion;
+  final bool disponible;
 
   Producto({
     this.id,
@@ -17,21 +15,21 @@ class Producto {
     required this.precio,
     required this.categoria,
     required this.subcategoria,
-    this.imagen = '',
+    required this.imagen,
     required this.descripcion,
     required this.disponible,
   });
 
-  factory Producto.fromMap(Map<String, dynamic> data, String id) {
+  factory Producto.fromMap(Map<String, dynamic> map, String? id) {
     return Producto(
       id: id,
-      nombre: data['nombre'] ?? '',
-      precio: (data['precio'] ?? 0).toDouble(),
-      categoria: data['categoria'] ?? '',
-      subcategoria: data['subcategoria'] ?? 'Tacos',
-      imagen: data['imagen'],
-      descripcion: data['descripcion'] ?? '',
-      disponible: data['disponible'] ?? false,
+      nombre: map['nombre'] ?? '',
+      precio: (map['precio'] ?? 0.0).toDouble(),
+      categoria: map['categoria'] ?? 'Menú',
+      subcategoria: map['subcategoria'] ?? 'Tacos',
+      imagen: map['imagen'] ?? '',
+      descripcion: map['descripcion'] ?? '',
+      disponible: map['disponible'] ?? true,
     );
   }
 

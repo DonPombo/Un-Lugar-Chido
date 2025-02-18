@@ -1,48 +1,40 @@
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as path;
 
 class ImageService {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _picker = ImagePicker();
 
-  Future<String?> uploadImage(dynamic imageFile, String path) async {
+  Future<String?> uploadImage(dynamic imageFile, String bucketPath) async {
     try {
-      final String fileName = const Uuid().v4();
-      final Reference ref = _storage.ref().child('$path/$fileName');
+      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final String fileExt = kIsWeb
+          ? path.extension((imageFile as XFile).name)
+          : path.extension((imageFile as File).path);
+      final String fullPath = '$bucketPath/$fileName$fileExt';
 
-      UploadTask uploadTask;
-
-      // Manejo de subida de archivos dependiendo de la plataforma
+      Uint8List bytes;
       if (kIsWeb) {
-        // Para web, usamos 'putData' y convertimos a bytes
-        uploadTask = ref.putData(await imageFile.readAsBytes());
+        bytes = await imageFile.readAsBytes();
       } else {
-        // Para móviles, aseguramos que sea un 'File'
-        if (imageFile is File) {
-          uploadTask = ref.putFile(imageFile);
-        } else if (imageFile is XFile) {
-          // Convertimos XFile a File
-          uploadTask = ref.putFile(File(imageFile.path));
-        } else {
-          throw Exception('Unsupported file type: ${imageFile.runtimeType}');
-        }
+        bytes = await imageFile.readAsBytes();
       }
 
-      final TaskSnapshot taskSnapshot = await uploadTask;
-      final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      await _supabase.storage.from('productos_imagenes').uploadBinary(
+            fullPath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: 'image/${fileExt.replaceAll('.', '')}',
+            ),
+          );
 
-      // Guardar URL en Firestore
-      await _firestore.collection('images').add({
-        'url': downloadUrl,
-        'path': '$path/$fileName',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      final String downloadUrl =
+          _supabase.storage.from('productos_imagenes').getPublicUrl(fullPath);
 
+      print('Image uploaded successfully. URL: $downloadUrl');
       return downloadUrl;
     } catch (e) {
       print('Error uploading image: $e');
@@ -50,29 +42,16 @@ class ImageService {
     }
   }
 
-  Future<dynamic> pickImage(ImageSource source) async {
-    final XFile? pickedFile = await _picker.pickImage(source: source);
+  Future<dynamic> pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       if (kIsWeb) {
-        return pickedFile; // Devuelve XFile para la web
+        return pickedFile;
       } else {
-        return File(pickedFile.path); // Convierte a File para móviles
+        return File(pickedFile.path);
       }
     }
-    return null; // Retorna null si no se selecciona ningún archivo
-  }
-
-  Future<List<String>> getImages() async {
-    try {
-      final QuerySnapshot snapshot = await _firestore
-          .collection('images')
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return snapshot.docs.map((doc) => doc['url'] as String).toList();
-    } catch (e) {
-      print('Error getting images: $e');
-      return [];
-    }
+    return null;
   }
 }

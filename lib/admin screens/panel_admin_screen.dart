@@ -1,83 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
+import '../../services/services.dart';
 import '../../models/producto.dart';
-import '../../services/firestore_service.dart';
-import '../../services/auth_service.dart';
 import 'dialogs/dialogs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 
 class PanelAdminScreen extends StatefulWidget {
-  const PanelAdminScreen({Key? key}) : super(key: key);
+  const PanelAdminScreen({super.key});
 
   @override
   PanelAdminScreenState createState() => PanelAdminScreenState();
 }
 
 class PanelAdminScreenState extends State<PanelAdminScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final SupabaseService _supabaseService = SupabaseService();
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
-  final String defaultImageUrl = 
-      'https://via.placeholder.com/150';
+  final String defaultImageUrl = 'https://via.placeholder.com/150';
+
+  @override
+  void initState() {
+    super.initState();
+    _verificarAutenticacion();
+  }
+
+  void _verificarAutenticacion() async {
+    if (_authService.usuarioActual == null && mounted) {
+      context.go('/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Panel de Administración'),
-        actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.exit_to_app),
-            label: const Text('Cerrar sesión'),
-            onPressed: () async {
-              await _authService.cerrarSesion();
-              context.go('/');
-            },
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Panel de Administración'),
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.exit_to_app),
+              onPressed: () async {
+                await _authService.cerrarSesion();
+                if (mounted) context.go('/login');
+              },
+            ),
+          ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Menú'),
+              Tab(text: 'Barra'),
+            ],
           ),
-        ],
-      ),
-      body: _buildProductList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddProductDialog(context),
-        child: const Icon(Icons.add),
+        ),
+        body: TabBarView(
+          children: [
+            _buildProductList('Menú'),
+            _buildProductList('Barra'),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => mostrarDialogoEdicion(
+            context: context,
+            formKey: _formKey,
+            isLoading: isLoading,
+            setLoading: (bool value) => setState(() => isLoading = value),
+          ),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 
-  Widget _buildProductList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestoreService.getProductosStream(),
+  Widget _buildProductList(String categoria) {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _supabaseService.getProductosStream(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        List<Producto> productos = snapshot.data!.docs
-            .map((doc) => Producto.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        final productos = snapshot.data!
+            .map((doc) => Producto.fromMap(doc, doc['id']))
+            .where((producto) => producto.categoria == categoria)
             .toList();
 
         return ListView.builder(
           itemCount: productos.length,
+          padding: const EdgeInsets.all(8),
           itemBuilder: (context, index) {
-            Producto producto = productos[index];
+            final producto = productos[index];
             return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
-                    imageUrl: producto.imagen.isNotEmpty ? producto.imagen : defaultImageUrl,
+                    imageUrl: producto.imagen.isNotEmpty
+                        ? producto.imagen
+                        : defaultImageUrl,
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
                   ),
                 ),
                 title: Text(producto.nombre),
@@ -88,16 +117,26 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
                     Switch(
                       value: producto.disponible,
                       onChanged: (value) async {
-                        await _firestoreService.actualizarDisponibilidad(producto.id!, value);
+                        await _supabaseService.actualizarDisponibilidad(
+                            producto.id!, value);
+                        setState(() {});
                       },
                     ),
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _showEditProductDialog(context, producto),
+                      onPressed: () => mostrarDialogoEdicion(
+                        context: context,
+                        formKey: _formKey,
+                        producto: producto,
+                        isLoading: isLoading,
+                        setLoading: (bool value) =>
+                            setState(() => isLoading = value),
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: () => _showDeleteConfirmationDialog(context, producto),
+                      color: Colors.red,
+                      onPressed: () => _confirmarEliminacion(producto),
                     ),
                   ],
                 ),
@@ -109,68 +148,26 @@ class PanelAdminScreenState extends State<PanelAdminScreen> {
     );
   }
 
-  void _showAddProductDialog(BuildContext context) {
-    mostrarDialogoEdicion(
-      context: context,
-      formKey: _formKey,
-      firestoreService: _firestoreService,
-      isLoading: isLoading,
-      setLoading: (bool value) {
-        setState(() {
-          isLoading = value;
-        });
-      },
-    );
-  }
-
-  void _showEditProductDialog(BuildContext context, Producto producto) {
-    mostrarDialogoEdicion(
-      context: context,
-      formKey: _formKey,
-      firestoreService: _firestoreService,
-      producto: producto,
-      isLoading: isLoading,
-      setLoading: (bool value) {
-        setState(() {
-          isLoading = value;
-        });
-      },
-    );
-  }
-
-  void _showDeleteConfirmationDialog(BuildContext context, Producto producto) {
+  void _confirmarEliminacion(Producto producto) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: Text('¿Estás seguro de que quieres eliminar ${producto.nombre}?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Eliminar'),
-              onPressed: () async {
-                try {
-                  await _firestoreService.eliminarProducto(producto.id!);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Producto eliminado exitosamente')),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al eliminar el producto: $e')),
-                  );
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text('¿Eliminar ${producto.nombre}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _supabaseService.eliminarProducto(producto.id!);
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
     );
   }
 }

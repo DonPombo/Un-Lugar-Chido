@@ -37,16 +37,19 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/admin',
-      pageBuilder: (context, state) => MaterialPage(
-        key: state.pageKey,
-        child: const PanelAdminScreen(),
-      ),
+      pageBuilder: (context, state) {
+        print('Creando página del panel admin'); // Debug
+        return MaterialPage(
+          key: state.pageKey,
+          child: const PanelAdminScreen(),
+        );
+      },
     ),
     GoRoute(
       path: '/login',
       pageBuilder: (context, state) => MaterialPage(
         key: state.pageKey,
-        child:  const LoginScreen(),
+        child: const LoginScreen(),
       ),
     ),
   ],

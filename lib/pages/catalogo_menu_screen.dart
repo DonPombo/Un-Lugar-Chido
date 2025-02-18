@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'detalle_item_screen.dart';
 import '/models/producto.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogoMenuScreen extends StatelessWidget {
   const CatalogoMenuScreen({super.key});
@@ -35,8 +35,9 @@ class CatalogoMenuScreen extends StatelessWidget {
   }
 
   Widget _buildItemList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('productos').snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream:
+          Supabase.instance.client.from('productos').stream(primaryKey: ['id']),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -45,9 +46,8 @@ class CatalogoMenuScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        List<Producto> productos = snapshot.data!.docs
-            .map((doc) =>
-                Producto.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        List<Producto> productos = snapshot.data!
+            .map((doc) => Producto.fromMap(doc, doc['id']))
             .toList();
 
         return _buildListView(productos);
@@ -56,11 +56,10 @@ class CatalogoMenuScreen extends StatelessWidget {
   }
 
   Widget _buildItemListByCategory(String category) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('productos')
-          .where('categoria', isEqualTo: category)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: Supabase.instance.client
+          .from('productos')
+          .stream(primaryKey: ['id']).eq('categoria', category),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -69,9 +68,8 @@ class CatalogoMenuScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        List<Producto> productos = snapshot.data!.docs
-            .map((doc) =>
-                Producto.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        List<Producto> productos = snapshot.data!
+            .map((doc) => Producto.fromMap(doc, doc['id']))
             .toList();
 
         return _buildListView(productos);

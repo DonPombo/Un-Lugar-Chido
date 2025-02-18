@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:un_lugar_chido_app/pages/screens.dart';
-//importaciones de Firebase
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+
+  await Supabase.initialize(
+    url: 'https://alzwxzipmngvymwehlbm.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsend4emlwbW5ndnltd2VobGJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyMjI5NDAsImV4cCI6MjA1Mjc5ODk0MH0.0YjLe17b2O9pm1x78gmFNMHFuJMqcxg5iilZNzMIuDc',
   );
+
   runApp(const RestauranteMexicanoApp());
 }
 

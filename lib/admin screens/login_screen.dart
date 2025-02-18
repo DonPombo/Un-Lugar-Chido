@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../pages/screens.dart';
-import '../services/auth_service.dart';
+import '../services/services.dart';
+import '../Theme/theme_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,140 +10,163 @@ class LoginScreen extends StatefulWidget {
   LoginScreenState createState() => LoginScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
-  final AuthService _auth = AuthService();
+class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
-  String _error = '';
-  bool _obscureText = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authService = AuthService();
   bool _isLoading = false;
+  bool _obscureText = true;
+  String? _emailError;
+  String? _passwordError;
 
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _togglePasswordVisibility() {
+  Future<void> _login() async {
     setState(() {
-      _obscureText = !_obscureText;
+      _emailError = null;
+      _passwordError = null;
     });
+
+    // Validación básica
+    if (_emailController.text.isEmpty) {
+      setState(() => _emailError = 'El email es requerido');
+      return;
+    }
+    if (!_emailController.text.contains('@')) {
+      setState(() => _emailError = 'Ingrese un email válido');
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      setState(() => _passwordError = 'La contraseña es requerida');
+      return;
+    }
+
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      try {
+        final success = await _authService.iniciarSesion(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+
+        if (success && mounted) {
+          print('Navegando al panel de administración...'); // Debug
+          context.go('/admin');
+        } else {
+          setState(() => _passwordError = 'Credenciales inválidas');
+        }
+      } catch (e) {
+        print('Error en login: $e'); // Debug
+        setState(() => _passwordError =
+            'Error al iniciar sesión: Verifica tus credenciales');
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), // Fondo neutro
-      body: SafeArea(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              themeData.colorScheme.secondary,
+              themeData.primaryColor,
+            ],
+          ),
+        ),
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: FadeTransition(
-                opacity: _animation,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Icon(
-                        Icons.restaurant_menu,
-                        size: 100,
-                        color:
-                            themeData.primaryColor, // Color primario del ícono
-                      ),
-                      const SizedBox(height: 40),
-                      Text(
-                        'Iniciar Sesión',
-                        textAlign: TextAlign.center,
-                        style: themeData.textTheme
-                            .displayLarge, // Título con estilo del tema
-                      ),
-                      const SizedBox(height: 40),
-                      _buildTextField(
-                        label: 'Email',
-                        icon: Icons.email,
-                        onChanged: (val) => setState(() => _email = val),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildTextField(
-                        label: 'Contraseña',
-                        icon: Icons.lock,
-                        isPassword: true,
-                        onChanged: (val) => setState(() => _password = val),
-                      ),
-                      const SizedBox(height: 40),
-                      _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                backgroundColor:
-                                    themeData.colorScheme.secondary,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                textStyle: const TextStyle(fontSize: 18),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                elevation: 5, // Sombra para el botón
-                              ),
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-                                  try {
-                                    bool result = await _auth.iniciarSesion(
-                                        _email, _password);
-                                    if (result) {
-                                      context.go('/admin');
-                                    } else {
-                                      setState(() {
-                                        _error =
-                                            'Credenciales inválidas. Por favor, inténtalo de nuevo.';
-                                        _isLoading = false;
-                                      });
-                                    }
-                                  } catch (e) {
-                                    setState(() {
-                                      _error =
-                                          'Error de conexión. Por favor, inténtalo más tarde.';
-                                      _isLoading = false;
-                                    });
-                                  }
-                                }
-                              },
-                              child: const Text('Iniciar Sesión'),
+              padding: const EdgeInsets.all(24.0),
+              child: Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/images/logoChido.png',
+                          height: 100,
+                          width: 100,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Bienvenido',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            errorText: _emailError,
+                            prefixIcon: const Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _error,
-                        style:
-                            const TextStyle(color: Colors.red, fontSize: 14.0),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Contraseña',
+                            errorText: _passwordError,
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          obscureText: _obscureText,
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : ElevatedButton(
+                                  onPressed: _login,
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: themeData.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Iniciar Sesión',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -154,39 +177,10 @@ class LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required IconData icon,
-    required Function(String) onChanged,
-    bool isPassword = false,
-  }) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: themeData.primaryColor),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.visibility : Icons.visibility_off,
-                  color: themeData.primaryColor,
-                ),
-                onPressed: _togglePasswordVisibility,
-              )
-            : null,
-        filled: true,
-        fillColor: Colors.white, // Fondo blanco para el campo de texto
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide(color: themeData.primaryColor, width: 2.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide(color: themeData.primaryColor, width: 2.0),
-        ),
-      ),
-      obscureText: isPassword ? _obscureText : false,
-      validator: (val) => val!.isEmpty ? 'Por favor, ingresa $label' : null,
-      onChanged: onChanged,
-    );
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }
