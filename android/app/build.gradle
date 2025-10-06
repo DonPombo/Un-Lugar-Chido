@@ -1,0 +1,56 @@
+plugins {
+    id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.un_lugar_chido_app"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+    // Identificador único de la aplicación
+    applicationId "com.unlugarchido.app"
+    
+    // Configura la versión mínima del SDK a 23 (compatibilidad con Firebase)
+    minSdkVersion 23
+    
+    multiDexEnabled true
+
+    // Usa la versión de destino proporcionada por Flutter
+    targetSdkVersion flutter.targetSdkVersion
+    
+    // Código de versión y nombre de versión, puedes mantener los valores predeterminados de Flutter
+    versionCode flutter.versionCode
+    versionName flutter.versionName
+}
+
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+apply plugin: 'com.google.gms.google-services'
