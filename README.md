@@ -57,7 +57,7 @@ Sigue estos pasos para ejecutar el proyecto localmente.
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/d-pombo/Un-Lugar-Chido-main.git
+    git clone https://github.com/DonPombo/Un-Lugar-Chido-main.git
     cd Un-Lugar-Chido-main
     ```
 
