@@ -1,147 +1,132 @@
-🌮 Un Lugar Chido
+# 🌮 Un Lugar Chido
 
-Aplicación móvil construida con Flutter para mostrar y administrar el menú de un restaurante mexicano. Pensada para ser pública en GitHub sin exponer credenciales sensibles (Supabase keys, Google services, etc.).
+<p align="center">
+  <img src="assets/images/logoChido.png" alt="Un Lugar Chido Logo" width="200"/>
+</p>
 
----
-
-Contenido rápido:
-
-- Descripción
-- Características
-- Cómo ejecutar localmente (y mantener secretos fuera del repo)
-- Cómo desplegar / CI (GitHub Actions)
-- Estructura del proyecto
-- Observaciones y checklist de seguridad
+<p align="center">
+  <strong>Una aplicación móvil para administrar el menú de un restaurante mexicano.</strong>
+  <br />
+  <br />
+  <a href="https://github.com/d-pombo/Un-Lugar-Chido-main/stargazers"><img src="https://img.shields.io/github/stars/d-pombo/Un-Lugar-Chido-main?style=social" alt="GitHub Stars"></a>
+  <a href="https://github.com/d-pombo/Un-Lugar-Chido-main/network/members"><img src="https://img.shields.io/github/forks/d-pombo/Un-Lugar-Chido-main?style=social" alt="GitHub Forks"></a>
+  <a href="https://github.com/d-pombo/Un-Lugar-Chido-main/blob/main/LICENSE"><img src="https://img.shields.io/github/license/d-pombo/Un-Lugar-Chido-main" alt="License"></a>
+</p>
 
 ---
 
 ## 📌 Descripción
 
-"Un Lugar Chido" es una app demo que muestra un catálogo de productos (comida y barra), genera un QR para el menú, y trae un panel de administración para CRUD de productos en tiempo real usando Supabase.
+"Un Lugar Chido" es una aplicación demo construida con Flutter que sirve como un sistema de gestión de menús para un restaurante. Permite a los administradores gestionar los productos y a los clientes ver el menú a través de un código QR.
 
-El repositorio puede publicarse en GitHub. Todas las claves y credenciales deben mantenerse fuera del control de versiones mediante variables de entorno o secretos de CI.
+La aplicación está diseñada para ser de código abierto, demostrando cómo manejar secretos y claves de API de forma segura en un repositorio público de GitHub.
 
 ## 🚀 Características
 
-- Catálogo por categorías (Menú / Barra)
-- Panel administrador con alta/edición/eliminación de productos
-- Subida de imágenes y almacenamiento en Supabase
-- Autenticación Supabase para administración
-- QR para acceder al menú desde dispositivos móviles
-- Navegación con GoRouter
+- **Catálogo de Productos:** Menú y barra de bebidas por categorías.
+- **Panel de Administración:** Funcionalidades CRUD (Crear, Leer, Actualizar, Eliminar) para los productos.
+- **Almacenamiento de Imágenes:** Sube y almacena imágenes de productos en Supabase Storage.
+- **Autenticación:** Inicio de sesión seguro para administradores con Supabase Auth.
+- **Código QR:** Genera un código QR para que los clientes puedan acceder al menú fácilmente.
+- **Navegación Moderna:** Utiliza GoRouter para una navegación fluida y basada en rutas.
 
-## 🧩 Requisitos
+## 🛠️ Tech Stack
 
-- Flutter SDK (recomendado >= 3.5)
-- Cuenta y proyecto en Supabase
+- **Frontend:** Flutter
+- **Backend & Base de Datos:** Supabase
+- **Navegación:** GoRouter
+- **Gestión de Estado:** setState / ValueNotifier (implícito)
+- **Dependencias Principales:**
+  - `supabase_flutter`
+  - `go_router`
+  - `qr_flutter`
+  - `cached_network_image`
+  - `image_picker`
+  - `file_picker`
 
-## 🔐 Seguridad: cómo mantener el repo público
+## 🏁 Cómo Empezar
 
-1. No incluir claves en el código.
-	 - Ya se removieron las claves hard-coded de `lib/main.dart`.
-2. Añade las claves localmente en un archivo no rastreado por git (ej.: `supabase.env`) o pásalas en tiempo de ejecución con `--dart-define`.
-3. Usa `supabase.env.example` (incluido) como plantilla pública.
-4. Configura secretos en tu CI (GitHub Actions) y pásalos como `--dart-define` al compilar.
+Sigue estos pasos para ejecutar el proyecto localmente.
 
-### Ejemplo (local, recomendado):
+### Pre-requisitos
 
-1. Crea `supabase.env` en la raíz (NO subirlo):
+- Flutter SDK (versión >= 3.5)
+- Una cuenta y un proyecto en [Supabase](https://supabase.com/)
 
-```
-SUPABASE_URL=https://<tu-proyecto>.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiI...
-```
+### Instalación y Ejecución
 
-2. Carga las variables y ejecuta (PowerShell):
+1.  **Clona el repositorio:**
+    ```bash
+    git clone https://github.com/d-pombo/Un-Lugar-Chido-main.git
+    cd Un-Lugar-Chido-main
+    ```
 
-```powershell
-# Cargar manualmente las variables desde el archivo .env (ejemplo simple para PowerShell)
-$lines = Get-Content .\supabase.env
-foreach ($line in $lines) {
-	if ($line -match "^([^=]+)=(.*)$") {
-		$name = $matches[1]
-		$value = $matches[2]
-		Set-Item -Path Env:\$name -Value $value
-	}
-}
+2.  **Instala las dependencias:**
+    ```bash
+    flutter pub get
+    ```
 
-flutter run --dart-define=SUPABASE_URL=$env:SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$env:SUPABASE_ANON_KEY
-```
+3.  **Configura tus secretos de Supabase:**
 
-O, sin exportar variables, pásalas directamente (menos seguro):
+    Crea un archivo `supabase.env` en la raíz del proyecto. Este archivo **no** será rastreado por Git.
 
-```powershell
-flutter run --dart-define=SUPABASE_URL=https://<tu-proyecto>.supabase.co --dart-define=SUPABASE_ANON_KEY=<TU_ANON_KEY>
-```
+    ```
+    SUPABASE_URL=https://<tu-proyecto>.supabase.co
+    SUPABASE_ANON_KEY=<tu-anon-key>
+    ```
 
-### Ejemplo (GitHub Actions deployment snippet)
+    > **Nota:** Puedes encontrar un ejemplo en `supabase.env.example`.
 
+4.  **Ejecuta la aplicación:**
+
+    Utiliza el siguiente comando para pasar las variables de entorno a la aplicación en tiempo de ejecución:
+
+    ```bash
+    flutter run --dart-define-from-file=supabase.env
+    ```
+
+## 🔐 Seguridad y CI/CD
+
+Este proyecto demuestra cómo mantener un repositorio público sin exponer credenciales sensibles.
+
+- **Variables de Entorno:** Las claves de Supabase se cargan desde un archivo `.env` local (ignorado por Git) o desde secretos en un entorno de CI/CD.
+- **GitHub Actions:** El archivo `.github/workflows/main.yml` (si existe) puede ser configurado para construir la aplicación pasando los secretos de forma segura.
+
+**Ejemplo de un paso de build en GitHub Actions:**
 ```yaml
-jobs:
-	build:
-		runs-on: ubuntu-latest
-		steps:
-			- uses: actions/checkout@v4
-			- name: Install Flutter
-				uses: subosito/flutter-action@v2
-				with:
-					flutter-version: 'stable'
-			- name: Build APK
-				run: |
-					flutter pub get
-					flutter build apk --release --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+- name: Build APK
+  run: |
+    flutter pub get
+    flutter build apk --release --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 ```
 
-Agrega `SUPABASE_URL` y `SUPABASE_ANON_KEY` como Secrets del repositorio (Settings → Secrets).
+## 📁 Estructura del Proyecto
 
-## 🧭 Cómo ejecutar (desarrollo)
-
-1. Instala dependencias:
-
-```powershell
-flutter pub get
+```
+lib/
+├── admin screens/      # Pantallas de administración
+├── models/             # Modelos de datos (Producto, Usuario)
+├── pages/              # Pantallas principales de la app (Home, Catálogo, etc.)
+├── router/             # Configuración de GoRouter
+├── services/           # Lógica de negocio (Auth, Supabase, etc.)
+├── Theme/              # Tema de la aplicación
+└── main.dart           # Punto de entrada de la app
 ```
 
-2. Ejecuta en dispositivo/emulador pasando las credenciales (ver sección anterior):
+## 🤝 Cómo Contribuir
 
-```powershell
-flutter run --dart-define=SUPABASE_URL=https://<tu-proyecto>.supabase.co --dart-define=SUPABASE_ANON_KEY=<TU_ANON_KEY>
-```
+Las contribuciones son bienvenidas. Si deseas contribuir, por favor sigue estos pasos:
 
-3. Tests:
+1.  Haz un Fork del proyecto.
+2.  Crea una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
+3.  Realiza tus cambios y haz commit (`git commit -m 'Añade nueva funcionalidad'`).
+4.  Haz push a la rama (`git push origin feature/nueva-funcionalidad`).
+5.  Abre un Pull Request.
 
-```powershell
-flutter test
-```
+## 📄 Licencia
 
-> Nota: el test de ejemplo en `test/widget_test.dart` espera un contador. Puedes actualizar las pruebas a la lógica real de la app o eliminar/ajustar el test si no aplica.
-
-## 📁 Estructura importante
-
-- `lib/main.dart` — inicialización de Supabase (lee variables en tiempo de compilación).
-- `lib/services/` — servicios de Supabase, auth y subida de imágenes.
-- `lib/admin screens/` — pantallas y diálogos de administración.
-- `assets/images/` — imágenes usadas en la app.
-
-## ✅ Checklist antes de publicar el repo
-
-- [x] Quitar keys hard-coded
-- [x] Añadir `supabase.env.example` con placeholders
-- [x] Añadir `.gitignore` que excluya secretos y builds
-- [ ] Revisar `android/app/google-services.json` y `ios` si contienen identificadores sensibles (no subirlos si son privados)
-- [ ] Remplazar URLs y links de redes sociales por reales
-
-## Observaciones y recomendaciones rápidas
-
-- Revisa todas las rutas a assets (p.ej. `assets/images/logoChido.png`) y confirma que no haya rutas absolutas.
-- Considera meter la lógica de lectura de credenciales en un helper para facilitar tests.
-- Añade más tests: unidad de `SupabaseService` (mock client) y tests widget para rutas principales.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-Si quieres, puedo:
-
-- Añadir un pequeño script PowerShell en `scripts/` para cargar el `.env` y ejecutar `flutter run` con las `dart-define`.
-- Crear el workflow de GitHub Actions completo para build+release.
-
-Dime qué prefieres y lo hago.
+Desarrollado con ❤️ por [d-pombo](https://github.com/d-pombo)
