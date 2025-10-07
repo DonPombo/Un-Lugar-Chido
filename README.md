@@ -35,12 +35,11 @@ La aplicación está diseñada para ser de código abierto, demostrando cómo ma
 - **Frontend:** Flutter
 - **Backend & Base de Datos:** Supabase
 - **Navegación:** GoRouter
-- **Gestión de Estado:** setState / ValueNotifier (implícito)
+- **Gestión de Estado:** setState 
 - **Dependencias Principales:**
   - `supabase_flutter`
   - `go_router`
   - `qr_flutter`
-  - `cached_network_image`
   - `image_picker`
   - `file_picker`
 
@@ -57,7 +56,7 @@ Sigue estos pasos para ejecutar el proyecto localmente.
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/DonPombo/Un-Lugar-Chido-main.git
+    git clone https://github.com/DonPombo/Un-Lugar-Chido.git
     cd Un-Lugar-Chido-main
     ```
 
@@ -89,16 +88,6 @@ Sigue estos pasos para ejecutar el proyecto localmente.
 
 Este proyecto demuestra cómo mantener un repositorio público sin exponer credenciales sensibles.
 
-- **Variables de Entorno:** Las claves de Supabase se cargan desde un archivo `.env` local (ignorado por Git) o desde secretos en un entorno de CI/CD.
-- **GitHub Actions:** El archivo `.github/workflows/main.yml` (si existe) puede ser configurado para construir la aplicación pasando los secretos de forma segura.
-
-**Ejemplo de un paso de build en GitHub Actions:**
-```yaml
-- name: Build APK
-  run: |
-    flutter pub get
-    flutter build apk --release --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-```
 
 ## 📁 Estructura del Proyecto
 
@@ -129,4 +118,4 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 
 ---
 
-Desarrollado con ❤️ por [d-pombo](https://github.com/d-pombo)
+Desarrollado con ❤️ por [Don Pombo](https://github.com/DonPombo)
